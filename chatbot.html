@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat with GPT-4</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #f25050;
+      --primary-hover: #f25050ef;
+      --secondary-color: #00cec9;
+      --chat-bg: #f8f9fa;
+      --user-bubble: #f25050;
+      --ai-bubble: #fff;
+      --shadow: -10px 15px 150px #0000001a;
+      --gradient: linear-gradient(135deg, #000 10%, #f25050 100%);
+      --text:#000;
+      --text2:#222;
+      --angle1:135deg;
+      --angle2:50%;
+      --angle3:100%;
+      
+      --moonsun: linear-gradient(135deg, #000 50%, #f25050 100%);
+     /*--moonsun:linear-gradient(-135deg, #000 50%, #f25050 100%);*/
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: #2d3436;
+      line-height: 1.6;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--ai-bubble);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+    }
+    
+    .header {
+      background: var(--gradient);
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .header i {
+      font-size: 24px;
+    }
+    
+    .header h2 {
+      font-weight: 600;
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    #chatbox {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: var(--chat-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .message {
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .user-message {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    
+    .ai-message {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    
+    .message-bubble {
+      padding: 12px 18px;
+      border-radius: 18px;
+      margin-bottom: 5px;
+      word-wrap: break-word;
+      box-shadow: var(--shadow);
+      position: relative;
+      line-height: 1.5;
+    }
+    
+    .user-bubble {
+      background-color: var(--user-bubble);
+      color: white;
+      border-top-right-radius: 4px;
+      max-width:100%;
+    }
+    
+    .ai-bubble {
+      background-color: var(--ai-bubble);
+      border-top-left-radius: 4px;
+      border: 1px solid #e0e0e0;
+      color: var(--text);
+      max-width:100%;
+
+    }
+    
+    .message-sender {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .sender-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    
+    .user-icon {
+      background: white;
+      color: var(--user-bubble);
+    }
+    
+    .ai-icon {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .input-container {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      background: white;
+      
+    }
+    
+    #userInput {
+      flex: 1;
+      padding: 15px 20px;
+      font-size: 15px;
+      border-radius: 30px;
+      border: 1px solid #ddd;
+      outline: none;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+    #userInput::-webkit-scrollbar{
+        display: none;
+    }
+    #userInput:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    }
+    
+    button {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gradient);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button i {
+      font-size: 20px;
+    }
+    
+    
+    .typing {
+      display: inline-block;
+      padding: 10px 15px;
+      background: var(--ai-bubble);
+      border-radius: 18px;
+      margin-left: 10px;
+    }
+    
+    .typing-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text);
+      margin-right: 4px;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+    
+   
+    #chatbox::-webkit-scrollbar {
+      display: none;
+    }
+    
+    #chatbox::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    #chatbox::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 10px;
+    }
+    
+    #chatbox::-webkit-scrollbar-thumb:hover {
+      background: #aaa;
+    }
+    
+    
+    @media (max-width: 768px) {
+      .container {
+        height: 90vh;
+      }
+      
+      .message {
+        max-width: 90%;
+      }
+      
+      #userInput {
+        padding: 12px 15px;
+      }
+      
+      button {
+        width: 50px;
+        height: 50px;
+      }
+    }
+    
+     
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--moonsun);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      overflow: hidden;
+    }
+    
+    .theme-toggle:focus i{
+        animation: tra 1s;
+    }
+    
+    @keyframes tra {
+        0%{
+        
+        }
+        50%{
+            transform: translate(-100px,100px);
+
+        }
+        75%{
+            transform: translate(-200px,200px);
+        }
+        95%{
+            transform: translate(200px,-100px);
+
+        }
+        100%{
+       
+        }
+    }
+
+  </style>
+   <!-- <script>
+    // Check for token on page load
+    window.onload = function () {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        // Redirect to login if token doesn't exist
+        window.location.href = "https://myhomebucket727199.s3.us-east-1.amazonaws.com/Login.html";
+      }
+    };
+  </script> -->
+</head>
+<body id="bgbody">
+  <button class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </button>
+  
+  <div class="container" id="container">
+    <div class="header">
+      <i class="fas fa-robot"></i>
+      <h2>Chat with GPT-4</h2>
+    </div>
+    
+    <div id="chatbox">
+      
+      <div class="message ai-message">
+        <span class="message-sender">
+          <span class="sender-icon ai-icon"><i class="fas fa-robot"></i></span>
+          AI Assistant
+        </span>
+        <div class="message-bubble ai-bubble">
+          Hello! <br>How can I help you today?
+        </div>
+      </div>
+    </div>
+    
+    <div class="input-container" id="input-container">
+      <textarea id="userInput" placeholder="Type your message..." autocomplete="off" ></textarea>
+      <button onclick="sendMessage()" title="Send message" id="sendButton">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    
+    function generateRandomNumber() {
+      return Math.floor(Math.random() * 1000) + 1;
+    }
+    function escapeHTML(text) 
+    {
+      const div = document.createElement('div');
+      div.textContent = text; 
+      return div.innerHTML;
+    }
+    const chatbox = document.getElementById("chatbox");
+    function showTypingIndicator() {
+      const typingIndicator = document.createElement("div");
+      typingIndicator.className = "message ai-message";
+      typingIndicator.id = "typingIndicator";
+      typingIndicator.innerHTML = `
+        <span class="message-sender">
+          <span class="sender-icon ai-icon"><i class="fas fa-robot"></i></span>
+          AI Assistant
+        </span>
+        <div class="message-bubble ai-bubble typing">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      `;
+      chatbox.appendChild(typingIndicator);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    
+    function hideTypingIndicator() {
+      const typingIndicator = document.getElementById("typingIndicator");
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      
+      const sendButton = document.getElementById("sendButton");
+      
+     
+      input.disabled = true;
+      sendButton.disabled = true;
+      sendButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+      
+      chatbox.innerHTML += `
+        <div class="message user-message">
+          <span class="message-sender">
+            <span class="sender-icon user-icon"><i class="fas fa-user"></i></span>
+            You
+          </span>
+          <div class="message-bubble user-bubble">${escapeHTML(message)}</div>
+        </div>
+      `;
+
+      
+      showTypingIndicator();
+      
+      
+      input.value = "";
+      
+      try {
+        const response = await fetch("https://3uc134oqm3.execute-api.us-east-1.amazonaws.com/ChatApp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        
+        
+        hideTypingIndicator();
+        
+        
+        chatbox.innerHTML += `
+          <div class="message ai-message">
+            <span class="message-sender">
+              <span class="sender-icon ai-icon"><i class="fas fa-robot"></i></span>
+              AI Assistant
+            </span>
+            <div class="message-bubble ai-bubble">${escapeHTML(data.reply)}</div>
+          </div>
+        `;
+      } catch (error) {
+        
+        hideTypingIndicator();
+        
+        const randomNum = generateRandomNumber();
+        chatbox.innerHTML += `
+          <div class="message ai-message">
+            <span class="message-sender">
+              <span class="sender-icon ai-icon"><i class="fas fa-robot"></i></span>
+              AI Assistant
+            </span>
+            <div class="message-bubble ai-bubble">Your message: ${escapeHTML(message)}.<br> Here's a random number: ${randomNum}</div>
+          </div>
+        `;
+        console.error("Error:", error);
+      }
+
+
+      input.disabled = false;
+      sendButton.disabled = false;
+      sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      
+      input.focus();
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+
+    document.getElementById("userInput").addEventListener("keydown", function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) 
+      {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+    
+    document.getElementById("themeToggle").addEventListener("click", function() {
+      document.body.classList.toggle("dark-mode");
+      const icon = this.querySelector("i");
+      
+      if (document.body.classList.contains("dark-mode"))
+      {
+        icon.classList.remove("fa-moon");
+        icon.classList.add("fa-sun");
+        chatbox.style.background="#222";
+        document.getElementById("bgbody").style.background="#222";
+        document.getElementById("container").style.boxShadow="-10px 15px 150px #f250502a";
+        document.getElementById("input-container").style.background="#222";
+        document.getElementById("userInput").style.background="#333";
+        document.getElementById("userInput").style.color="#fff";
+        document.documentElement.style.setProperty('--ai-bubble', '#333');
+        document.documentElement.style.setProperty('--text', '#fff');
+        document.documentElement.style.setProperty('--text2', '#fff');
+        
+        document.documentElement.style.setProperty('--moonsun', 'linear-gradient(135deg, #f25050 50%, #000 100%)');
+
+      } 
+      else 
+      {
+        icon.classList.remove("fa-sun");
+        chatbox.style.background="white";
+        icon.classList.add("fa-moon");
+        document.getElementById("bgbody").style.background="white";
+        document.getElementById("container").style.boxShadow="-10px 15px 150px #0000005a";
+        document.getElementById("input-container").style.background="#fff";
+        document.getElementById("userInput").style.background="#fff";
+        document.getElementById("userInput").style.color="#000";
+        document.documentElement.style.setProperty('--ai-bubble', '#fff');
+        document.documentElement.style.setProperty('--text', '#000');
+        document.documentElement.style.setProperty('--text2', '#222');
+        document.documentElement.style.setProperty('--moonsun', 'linear-gradient(135deg, #000 50%, #f25050 100%)');
+       
+    }
+      setTimeout(()=>{document.getElementById("themeToggle").blur();document.getElementById("userInput").focus();},2000);
+    });
+
+    window.onload = function() {
+      document.getElementById("userInput").focus();
+    };
+  </script>
+</body>
+</html>
